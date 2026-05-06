@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 
 # Create engine
-engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=True)
+engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=False)
 
 def calculate_cogs_per_brand() -> pd.DataFrame:
     """
@@ -99,4 +99,4 @@ def calculate_cogs_per_brand() -> pd.DataFrame:
 if __name__ == "__main__":
     # Run
     cogs = calculate_cogs_per_brand()
-    print(cogs.sort_values("cogs", ascending=False).head(20).to_string())
+    print(cogs.sort_values("cogs", ascending=False).head(5).to_string(index=False))
