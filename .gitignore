@@ -221,3 +221,9 @@ __marimo__/
 
 # Ignore zip files
 *.zip
+
+# Ignore db files
+*.db
+
+# Ignore CSV files
+*.csv
