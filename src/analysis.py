@@ -96,7 +96,52 @@ def calculate_cogs_per_brand() -> pd.DataFrame:
                  "freight_allocation", "end_inv_value",
                  "cogs"]]
 
+def calculate_brand_profits_margins(cogs_brand: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculates the profits and margins in a per-brand basis using
+    a previously calculated COGS.
+    The Profit is calculated as Revenue - COGS,
+    the margins as (Revenue - COGS) / Revenue
+    """
+
+    # Aggregate revenue by brand
+    revenue = pd.read_sql("""
+        SELECT
+            Brand,
+            SUM(SalesDollars) AS total_revenue,
+            SUM(SalesQuantity) AS total_units
+            FROM SalesDec
+            GROUP BY Brand
+    """, engine)
+
+    # Merge revenue and COGS into a new data frame, do calculations
+    summary = revenue.merge(cogs_brand, how="left", on="Brand")
+    summary["cogs"] = summary["cogs"].fillna(0)  # Replace NaNs with zero
+
+    # Calculate profit and margin
+    summary["profit"] = summary["total_revenue"] - summary["cogs"]
+    summary["margin"] = np.where(
+        summary["total_revenue"] > 0,
+        summary["profit"] / summary["total_revenue"] * 100,
+        np.nan
+    )
+    # Return final results
+    return summary
+
+
 if __name__ == "__main__":
     # Run
-    cogs = calculate_cogs_per_brand()
-    print(cogs.sort_values("cogs", ascending=False).head(5).to_string(index=False))
+    cogs_brand = calculate_cogs_per_brand()
+    print("===COGS===")
+    print(cogs_brand.sort_values("cogs", ascending=False).head(5).to_string(index=False))
+    print("===PROFITS===")
+    summary = calculate_brand_profits_margins(cogs_brand)
+    print(summary.nlargest(10, "profit").to_string(index=False))
+    print("===MARGINS===")
+    print(summary.nlargest(10, "margin").to_string(index=False))
+    print("===LOSING BRANDS===")
+    losing_brands = summary[summary["profit"] < 0].sort_values("profit")
+    print(losing_brands[["Brand", "total_revenue",
+                        "cogs", "profit", "margin"]]
+          .to_string(index=False))
+
