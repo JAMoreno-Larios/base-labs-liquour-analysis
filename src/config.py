@@ -17,6 +17,7 @@ class Config:
     Data class that hold constants for our project
     """
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + str(basedir) + '/data/store.db'
+    RAW_DATA_PATH = basedir / 'data/raw'
 
     def __class_getitem__(cls, item):
         # Makes our class subscriptable
