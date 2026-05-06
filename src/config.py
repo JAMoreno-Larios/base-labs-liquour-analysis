@@ -9,7 +9,7 @@ from pathlib import Path
 from dataclasses import dataclass
 
 
-basedir = Path(__file__).absolute()  # Easier if we know where we are
+basedir = Path(__file__).absolute().parents[1]  # Easier if we know where we are
 
 @dataclass
 class Config:
