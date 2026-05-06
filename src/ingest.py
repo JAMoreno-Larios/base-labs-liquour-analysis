@@ -3,6 +3,8 @@ ingest.py
 
 Here we will ingeest all raw .CSV files found in data/raw into a
 SQLite database using SQLAlchemy as ORM
+
+J. A. Moreno
 """
 
 from pathlib import Path
