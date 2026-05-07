@@ -116,22 +116,24 @@ def calculate_cogs_per_vendor() -> pd.DataFrame:
     # Calculate the purchases done per brand
     purchases = pd.read_sql("""
         SELECT VendorNumber,
+        VendorName,
         SUM(Dollars) as total_purchases
         FROM PurchasesDec
-        GROUP BY VendorNumber
+        GROUP BY VendorNumber, VendorName
     """, engine)
 
     # Calculate the freight cost per vendor
     freight = pd.read_sql("""
         SELECT
             VendorNumber,
+            VendorName,
             SUM(Freight) as total_freight
         FROM VendorInvoicesDec
-        GROUP BY VendorNumber
+        GROUP BY VendorNumber, VendorName
     """, engine)
 
     # Merge dataframes, use union of keys for each pair of frames
-    cogs = purchases.merge(freight, how="outer", on="VendorNumber")
+    cogs = purchases.merge(freight, how="outer", on=["VendorNumber", "VendorName"])
 
     # If there are NaNs, fill with zeros
     cogs = cogs.fillna(0)
@@ -140,7 +142,7 @@ def calculate_cogs_per_vendor() -> pd.DataFrame:
     cogs["cogs"] = cogs["total_purchases"] + cogs["total_freight"]
 
     # Return completed dataframe
-    return cogs[["VendorNumber", "total_purchases",
+    return cogs[["VendorNumber", "VendorName", "total_purchases",
                  "total_freight", "cogs"]]
 
 
@@ -190,6 +192,7 @@ def calculate_vendor_profits_margins(cogs_vendor: pd.DataFrame) -> pd.DataFrame:
     revenue = pd.read_sql("""
         SELECT
             VendorNo as VendorNumber,
+            VendorName,
             SUM(SalesDollars) AS total_revenue,
             SUM(SalesQuantity) AS total_units
             FROM SalesDec
@@ -197,7 +200,7 @@ def calculate_vendor_profits_margins(cogs_vendor: pd.DataFrame) -> pd.DataFrame:
     """, engine)
 
     # Merge revenue and COGS into a new data frame, do calculations
-    summary = revenue.merge(cogs_vendor, how="left", on="VendorNumber")
+    summary = revenue.merge(cogs_vendor, how="left", on=["VendorNumber", "VendorName"])
     summary["cogs"] = summary["cogs"].fillna(0)  # Replace NaNs with zero
 
     # Calculate profit and margin
@@ -228,16 +231,16 @@ if __name__ == "__main__":
           .to_string(index=False))
 
     # Per vendor
-#     cogs_vendor = calculate_cogs_per_vendor()
-#     print("===COGS PER VENDOR===")
-#     print(cogs_vendor.sort_values("cogs", ascending=False).head(5).to_string(index=False))
-#     print("===PROFITS===")
-#     summary = calculate_vendor_profits_margins(cogs_vendor)
-#     print(summary.nlargest(10, "profit").to_string(index=False))
-#     print("===MARGINS===")
-#     print(summary.nlargest(10, "margin").to_string(index=False))
-#     print("===LOSING VENDORS===")
-#     losing_vendors = summary[summary["profit"] < 0].sort_values("profit")
-#     print(losing_vendors[["VendorNumber", "total_revenue",
-#                         "cogs", "profit", "margin"]]
-#           .to_string(index=False))
+    cogs_vendor = calculate_cogs_per_vendor()
+    print("===COGS PER VENDOR===")
+    print(cogs_vendor.sort_values("cogs", ascending=False).head(5).to_string(index=False))
+    print("===PROFITS===")
+    summary = calculate_vendor_profits_margins(cogs_vendor)
+    print(summary.nlargest(10, "profit").to_string(index=False))
+    print("===MARGINS===")
+    print(summary.nlargest(10, "margin").to_string(index=False))
+    print("===LOSING VENDORS===")
+    losing_vendors = summary[summary["profit"] < 0].sort_values("profit")
+    print(losing_vendors[["VendorNumber", "VendorName", "total_revenue",
+                        "cogs", "profit", "margin"]]
+          .to_string(index=False))
