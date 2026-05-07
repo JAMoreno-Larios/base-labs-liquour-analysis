@@ -14,7 +14,7 @@ mdFile = MdUtils(file_name=str(Config.REPORT_PATH/'report.md'),
                  title="Annie's Magic Numbers Code Challenge")
 mdFile.author = "José Agustín Moreno"
 
-mdFile.new_header(level=1, title="Annie's Magic Numbers")
+mdFile.new_header(level=1, title="Introduction")
 mdFile.new_paragraph(
     """
 The requirements for this report are to find out the following:
@@ -40,7 +40,8 @@ $Margins = (Revenue - COGS) / Revenue * 100 [%]$
 We'll explain a bit more in the following sections.
     """)
 
-mdFile.new_header(level=2, title="Top 10 brands")
+### BRANDS
+mdFile.new_header(level=1, title="Top 10 brands")
 
 mdFile.new_paragraph(
 """
@@ -53,17 +54,111 @@ From exploring the SQL tables, we identified that the brand refers to a single p
 cogs_brand = analysis.calculate_cogs_per_brand()
 summary_cogs = analysis.calculate_brand_profits_margins(cogs_brand)
 
-mdFile.new_header(level=3, title="Per profits")
+mdFile.new_header(level=2, title="Per profits")
 mdFile.new_paragraph(
     summary_cogs[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
     .nlargest(10, "profit")
     .to_markdown(index=False))
 
-mdFile.new_header(level=3, title="Per margins")
+mdFile.new_header(level=2, title="Per margins")
+mdFile.new_header(level=3, title="Naive run - no purchases done in the period")
 mdFile.new_paragraph(
     summary_cogs[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
     .nlargest(10, "margin")
     .to_markdown(index=False))
+
+mdFile.new_header(level=3, title="Considering if brand was ordered in the period")
+summary_cogs_purchases = summary_cogs[summary_cogs['cogs'] > 0]
+mdFile.new_paragraph(
+    summary_cogs_purchases[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
+    .nlargest(10, "margin")
+    .to_markdown(index=False))
+
+mdFile.new_header(level=2, title="Losing brands")
+
+losing_brands = summary_cogs[summary_cogs["profit"] < 0].sort_values("profit")
+mdFile.new_paragraph(losing_brands[["Brand",
+                                    "Description",
+                                    "total_revenue",
+                                    "cogs", "profit", "margin"]]
+                     .head(20)
+                     .to_markdown(index=False)
+                     )
+
+mdFile.new_header(level=2, title="Results")
+
+mdFile.new_header(level=3, title="High Vodka and Whiskey sales drive most of the profit")
+
+mdFile.new_paragraph(
+    """
+Most of the profits are driven by high-volume sales, which are reflected on the first table.
+From it, we can see that four Vodka brands and three Whiskey bands dominate the leaderboard.
+    """
+)
+
+mdFile.new_header(level=3, title="'100%' margins are inventory runoff")
+
+mdFile.new_paragraph(
+    """
+Brands that have 100% margin over this period are because no purchases were made.
+Sales were made from existing stock, which means that these margins are an data artifact.
+    """
+)
+
+mdFile.new_header(level=3, title="High margins correspond to low-volume items")
+
+mdFile.new_paragraph(
+    """
+Brands with 90%+ margins correspond to tiny revenue scales. Again, this
+could be influenced by existing inventory with minimal restocking.
+    """
+)
+
+### Vendor-based
+
+mdFile.new_header(level=1, title="Top 10 brands")
+
+mdFile.new_paragraph(
+"""
+Since both beggining and end inventory tables do not have information regarding the vendor, we cannot use the full accounting formula.
+Instead we use the purchase-based COGS:
+    COGS_vendor = Purchases_vendor + Freight_vendor
+""")
+# Calculate
+
+cogs_vendor = analysis.calculate_cogs_per_vendor()
+summary_cogs = analysis.calculate_vendor_profits_margins(cogs_vendor)
+
+mdFile.new_header(level=2, title="Per profits")
+mdFile.new_paragraph(
+    summary_cogs[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]]
+    .nlargest(10, "profit")
+    .to_markdown(index=False))
+
+mdFile.new_header(level=2, title="Per margins")
+mdFile.new_header(level=3, title="Naive run - no purchases done in the period")
+mdFile.new_paragraph(
+    summary_cogs[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]]
+    .nlargest(10, "margin")
+    .to_markdown(index=False))
+
+mdFile.new_header(level=3, title="Considering if we ordered from a given vendor during the period")
+summary_cogs_purchases = summary_cogs[summary_cogs['cogs'] > 0]
+mdFile.new_paragraph(
+    summary_cogs_purchases[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]]
+    .nlargest(10, "margin")
+    .to_markdown(index=False))
+
+mdFile.new_header(level=2, title="Losing Vendors")
+
+losing_vendors = summary_cogs[summary_cogs["profit"] < 0].sort_values("profit")
+mdFile.new_paragraph(losing_vendors[["VendorNumber",
+                                    "VendorName",
+                                    "total_revenue",
+                                    "cogs", "profit", "margin"]]
+                     .head(20)
+                     .to_markdown(index=False)
+                     )
 
 # Generate the file
 mdFile.create_md_file()
