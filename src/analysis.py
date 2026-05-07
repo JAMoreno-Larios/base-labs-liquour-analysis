@@ -31,24 +31,29 @@ def calculate_cogs_per_brand() -> pd.DataFrame:
     
     # Get initial inventory value per brand
     initial_inventory = pd.read_sql("""
-        SELECT Brand, SUM(onHand * Price) as beg_inv_value
+        SELECT Brand,
+        Description,
+        SUM(onHand * Price) as beg_inv_value
         FROM BegInvDec
-        GROUP BY Brand
+        GROUP BY Brand, Description
     """, engine)
     
     # Calculate the ending inventory value per brand
     ending_inventory = pd.read_sql("""
-        SELECT Brand, SUM(onHand * Price) as end_inv_value
+        SELECT Brand,
+        Description,
+        SUM(onHand * Price) as end_inv_value
         FROM EndInvDec
-        GROUP BY Brand
+        GROUP BY Brand, Description
     """, engine)
 
     # Calculate the purchases done per brand
     purchases = pd.read_sql("""
         SELECT Brand,
+        Description,
         SUM(Dollars) as total_purchases
         FROM PurchasesDec
-        GROUP BY Brand
+        GROUP BY Brand, Description
     """, engine)
 
     # Calculate the freight cost per brand
@@ -70,14 +75,14 @@ def calculate_cogs_per_brand() -> pd.DataFrame:
 
     # Merge dataframes, use union of keys for each pair of frames
     # Merge initial with ending
-    cogs = initial_inventory.merge(ending_inventory, how="outer", on="Brand")
+    cogs = initial_inventory.merge(ending_inventory, how="outer", on=["Brand", "Description"])
     # Merge with purchases
-    cogs = cogs.merge(purchases, how="outer", on="Brand")
+    cogs = cogs.merge(purchases, how="outer", on=["Brand", "Description"])
     # Merge with freight allocation
     cogs = cogs.merge(
-        freight_allocation[["Brand", "freight_allocation"]],
+        freight_allocation[["Brand", "Description", "freight_allocation"]],
         how="outer",
-        on="Brand"
+        on=["Brand", "Description"]
     )
 
     # If there are NaNs, fill with zeros
@@ -92,7 +97,7 @@ def calculate_cogs_per_brand() -> pd.DataFrame:
     )
 
     # Return completed dataframe
-    return cogs[["Brand", "beg_inv_value", "total_purchases",
+    return cogs[["Brand", "Description", "beg_inv_value", "total_purchases",
                  "freight_allocation", "end_inv_value",
                  "cogs"]]
 
@@ -151,14 +156,15 @@ def calculate_brand_profits_margins(cogs_brand: pd.DataFrame) -> pd.DataFrame:
     revenue = pd.read_sql("""
         SELECT
             Brand,
+            Description,
             SUM(SalesDollars) AS total_revenue,
             SUM(SalesQuantity) AS total_units
             FROM SalesDec
-            GROUP BY Brand
+            GROUP BY Brand, Description
     """, engine)
 
     # Merge revenue and COGS into a new data frame, do calculations
-    summary = revenue.merge(cogs_brand, how="left", on="Brand")
+    summary = revenue.merge(cogs_brand, how="left", on=["Brand", "Description"])
     summary["cogs"] = summary["cogs"].fillna(0)  # Replace NaNs with zero
 
     # Calculate profit and margin
@@ -207,31 +213,31 @@ def calculate_vendor_profits_margins(cogs_vendor: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Run
-    # cogs_brand = calculate_cogs_per_brand()
-    # print("===COGS===")
-    # print(cogs_brand.sort_values("cogs", ascending=False).head(5).to_string(index=False))
-    # print("===PROFITS===")
-    # summary = calculate_brand_profits_margins(cogs_brand)
-    # print(summary.nlargest(10, "profit").to_string(index=False))
-    # print("===MARGINS===")
-    # print(summary.nlargest(10, "margin").to_string(index=False))
-    # print("===LOSING BRANDS===")
-    # losing_brands = summary[summary["profit"] < 0].sort_values("profit")
-    # print(losing_brands[["Brand", "total_revenue",
-    #                     "cogs", "profit", "margin"]]
-    #       .to_string(index=False))
-
-    # Per vendor
-    cogs_vendor = calculate_cogs_per_vendor()
-    print("===COGS PER VENDOR===")
-    print(cogs_vendor.sort_values("cogs", ascending=False).head(5).to_string(index=False))
+    cogs_brand = calculate_cogs_per_brand()
+    print("===COGS===")
+    print(cogs_brand.sort_values("cogs", ascending=False).head(5).to_string(index=False))
     print("===PROFITS===")
-    summary = calculate_vendor_profits_margins(cogs_vendor)
+    summary = calculate_brand_profits_margins(cogs_brand)
     print(summary.nlargest(10, "profit").to_string(index=False))
     print("===MARGINS===")
     print(summary.nlargest(10, "margin").to_string(index=False))
-    print("===LOSING VENDORS===")
-    losing_vendors = summary[summary["profit"] < 0].sort_values("profit")
-    print(losing_vendors[["VendorNumber", "total_revenue",
-                        "cogs", "profit", "margin"]]
+    print("===LOSING BRANDS===")
+    losing_brands = summary[summary["profit"] < 0].sort_values("profit")
+    print(losing_brands[["Brand", "Description", "total_revenue",
+                        "cogs", "profit", "margin"]].head(10)
           .to_string(index=False))
+
+    # Per vendor
+#     cogs_vendor = calculate_cogs_per_vendor()
+#     print("===COGS PER VENDOR===")
+#     print(cogs_vendor.sort_values("cogs", ascending=False).head(5).to_string(index=False))
+#     print("===PROFITS===")
+#     summary = calculate_vendor_profits_margins(cogs_vendor)
+#     print(summary.nlargest(10, "profit").to_string(index=False))
+#     print("===MARGINS===")
+#     print(summary.nlargest(10, "margin").to_string(index=False))
+#     print("===LOSING VENDORS===")
+#     losing_vendors = summary[summary["profit"] < 0].sort_values("profit")
+#     print(losing_vendors[["VendorNumber", "total_revenue",
+#                         "cogs", "profit", "margin"]]
+#           .to_string(index=False))
