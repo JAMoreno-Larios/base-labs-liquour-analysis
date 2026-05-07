@@ -31,20 +31,26 @@ def calculate_cogs_per_brand() -> pd.DataFrame:
     
     # Get initial inventory value per brand
     initial_inventory = pd.read_sql("""
-        SELECT Brand,
-        Description,
-        SUM(onHand * Price) as beg_inv_value
-        FROM BegInvDec
-        GROUP BY Brand, Description
+        SELECT 
+            b.Brand,
+            b.Description,
+            SUM(b.onHand * p.PurchasePrice) as beg_inv_value
+        FROM BegInvDec b
+        JOIN PricingPurchasesDec p
+            ON b.Brand = p.Brand AND b.Description = p.Description
+        GROUP BY b.Brand, b.Description
     """, engine)
     
     # Calculate the ending inventory value per brand
     ending_inventory = pd.read_sql("""
-        SELECT Brand,
-        Description,
-        SUM(onHand * Price) as end_inv_value
-        FROM EndInvDec
-        GROUP BY Brand, Description
+        SELECT 
+            b.Brand,
+            b.Description,
+            SUM(b.onHand * p.PurchasePrice) as end_inv_value
+        FROM EndInvDec b
+        JOIN PricingPurchasesDec p
+            ON b.Brand = p.Brand AND b.Description = p.Description
+        GROUP BY b.Brand, b.Description
     """, engine)
 
     # Calculate the purchases done per brand
