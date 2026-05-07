@@ -55,13 +55,13 @@ summary_cogs = analysis.calculate_brand_profits_margins(cogs_brand)
 
 mdFile.new_header(level=3, title="Per profits")
 mdFile.new_paragraph(
-    summary_cogs[["Brand", "Description", "profit"]]
+    summary_cogs[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
     .nlargest(10, "profit")
     .to_markdown(index=False))
 
 mdFile.new_header(level=3, title="Per margins")
 mdFile.new_paragraph(
-    summary_cogs[["Brand", "Description", "margin"]]
+    summary_cogs[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
     .nlargest(10, "margin")
     .to_markdown(index=False))
 

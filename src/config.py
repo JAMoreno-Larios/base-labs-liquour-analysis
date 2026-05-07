@@ -18,6 +18,7 @@ class Config:
     """
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + str(basedir) + '/data/store.db'
     RAW_DATA_PATH = basedir / 'data/raw'
+    REPORT_PATH = basedir / 'reports'
 
     def __class_getitem__(cls, item):
         # Makes our class subscriptable
