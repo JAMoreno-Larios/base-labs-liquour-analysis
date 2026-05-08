@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from config import Config
 
 # Create engine
-engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=True)
+engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=False)
 
 def ingest_csv(input_path: Path, table_name: str):
 
