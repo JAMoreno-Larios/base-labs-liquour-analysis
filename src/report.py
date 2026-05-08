@@ -29,13 +29,13 @@ For this analysis, we will calculate the profits using the Cost Of Goods Sold (C
 From our SQL database exploration (refer to `notebooks/sql_columns_exploration.ipynb`), we do need to calculate two different COGS metrics: the full equation for the per-brand metrics, and a purchases-only COGS for the per-vendor one since the inventory tables do not contain vendor-specific information.
 
 The full accounting COGS formula is:
-$COGS = Initial Inventory Value + Purchases + Freight Costs - Final Inventory Value$
+$$COGS = Initial Inventory Value + Purchases + Freight Costs - Final Inventory Value$$
 
 Then, the profit is:
-$Profit = Revenue - COGS$
+$$Profit = Revenue - COGS$$
 
 Thus, the margins are:
-$Margins = (Revenue - COGS) / Revenue * 100 [%]$
+$$Margins = (Revenue - COGS) / Revenue * 100 [%]$$
 
 We'll explain a bit more in the following sections.
     """)
@@ -121,31 +121,29 @@ Instead we use the purchase-based COGS:
 # Calculate
 
 cogs_vendor = analysis.calculate_cogs_per_vendor()
-summary_cogs = analysis.calculate_vendor_profits_margins(cogs_vendor)
+summary_vendor = analysis.calculate_vendor_profits_margins(cogs_vendor)
 
 mdFile.new_header(level=2, title="Per profits")
-mdFile.new_paragraph(
-    summary_cogs[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]]
-    .nlargest(10, "profit")
-    .to_markdown(index=False))
+top_profit_vendor = summary_vendor[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]].nlargest(10, "profit")
+
+mdFile.new_paragraph(top_profit_vendor.to_markdown(index=False))
 
 mdFile.new_header(level=2, title="Per margins")
 mdFile.new_header(level=3, title="Naive run - no purchases done in the period")
-mdFile.new_paragraph(
-    summary_cogs[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]]
-    .nlargest(10, "margin")
-    .to_markdown(index=False))
+
+top_margin_vendor_naive = summary_vendor[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]].nlargest(10, "margin")
+mdFile.new_paragraph(top_margin_vendor_naive.to_markdown(index=False))
 
 mdFile.new_header(level=3, title="Considering if we ordered from a given vendor during the period")
-summary_cogs_purchases = summary_cogs[summary_cogs['cogs'] > 0]
-mdFile.new_paragraph(
-    summary_cogs_purchases[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]]
-    .nlargest(10, "margin")
-    .to_markdown(index=False))
+
+top_margin_vendor_filtered = summary_vendor[summary_vendor['cogs'] > 0]
+top_margin_vendor_filtered = top_margin_vendor_filtered[["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]].nlargest(10, "margin")
+
+mdFile.new_paragraph(top_margin_vendor_filtered.to_markdown(index=False))
 
 mdFile.new_header(level=2, title="Losing Vendors")
 
-losing_vendors = summary_cogs[summary_cogs["profit"] < 0].sort_values("profit")
+losing_vendors = summary_vendor[summary_vendor["profit"] < 0].sort_values("profit")
 mdFile.new_paragraph(losing_vendors[["VendorNumber",
                                     "VendorName",
                                     "total_revenue",
