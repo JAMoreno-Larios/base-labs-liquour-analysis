@@ -52,31 +52,25 @@ From exploring the SQL tables, we identified that the brand refers to a single p
 """)
 # Calculate
 cogs_brand = analysis.calculate_cogs_per_brand()
-summary_cogs = analysis.calculate_brand_profits_margins(cogs_brand)
+summary_brand = analysis.calculate_brand_profits_margins(cogs_brand)
 
 mdFile.new_header(level=2, title="Per profits")
-mdFile.new_paragraph(
-    summary_cogs[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
-    .nlargest(10, "profit")
-    .to_markdown(index=False))
+top_profit = summary_brand[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]].nlargest(10, "profit")
+mdFile.new_paragraph(top_profit.to_markdown(index=False))
 
 mdFile.new_header(level=2, title="Per margins")
 mdFile.new_header(level=3, title="Naive run - no purchases done in the period")
-mdFile.new_paragraph(
-    summary_cogs[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
-    .nlargest(10, "margin")
-    .to_markdown(index=False))
+top_margin_naive = summary_brand[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]].nlargest(10, "margin")
+mdFile.new_paragraph(top_margin_naive.to_markdown(index=False))
 
 mdFile.new_header(level=3, title="Considering if brand was ordered in the period")
-summary_cogs_purchases = summary_cogs[summary_cogs['cogs'] > 0]
-mdFile.new_paragraph(
-    summary_cogs_purchases[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]]
-    .nlargest(10, "margin")
-    .to_markdown(index=False))
+top_margin_filtered = summary_brand[summary_brand['cogs'] > 0]
+top_margin_filtered = top_margin_filtered[["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]].nlargest(10, "margin")
+mdFile.new_paragraph(top_margin_filtered.to_markdown(index=False))
 
 mdFile.new_header(level=2, title="Losing brands")
 
-losing_brands = summary_cogs[summary_cogs["profit"] < 0].sort_values("profit")
+losing_brands = summary_brand[summary_brand["profit"] < 0].sort_values("profit")
 mdFile.new_paragraph(losing_brands[["Brand",
                                     "Description",
                                     "total_revenue",
