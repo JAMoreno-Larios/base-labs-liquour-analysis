@@ -10,7 +10,12 @@ J. A. Moreno
 from pathlib import Path
 import pandas as pd
 import sqlalchemy as sa
-from config import Config
+
+# Do a conditional import to address issues with config
+if __package__:
+    from .config import Config
+else:
+    from config import Config
 
 # Create engine
 engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=False)

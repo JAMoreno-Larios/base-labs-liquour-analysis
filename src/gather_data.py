@@ -12,7 +12,11 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from config import Config
+# Do a conditional import to address issues with config
+if __package__:
+    from .config import Config
+else:
+    from config import Config
 
 # Define the website URL
 BASE_URL = (

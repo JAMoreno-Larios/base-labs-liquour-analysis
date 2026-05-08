@@ -9,9 +9,14 @@ J. A. Moreno
 """
 
 import sqlalchemy as sa
-from config import Config
 import pandas as pd
 import numpy as np
+
+# Do a conditional import to address issues with config
+if __package__:
+    from .config import Config
+else:
+    from config import Config
 
 # Create engine
 engine = sa.create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=False)

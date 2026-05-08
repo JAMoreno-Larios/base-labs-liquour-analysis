@@ -7,9 +7,13 @@ J. A. Moreno
 """
 
 from mdutils.mdutils import MdUtils
-import analysis
-from config import Config
 
+if __package__:
+    from .config import Config
+    from . import analysis
+else:
+    from config import Config
+    import analysis
 
 def generate_report():
 
