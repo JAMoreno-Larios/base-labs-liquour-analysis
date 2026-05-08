@@ -9,9 +9,7 @@ J. A. Moreno
 """
 
 import argparse
-import sys
-from pathlib import Path
-from src import gather_data, ingest, analysis, report
+from src import gather_data, ingest, report
 from src.config import Config
 
 def gather():
@@ -27,3 +25,42 @@ def gather():
 
 def ingestion():
     print("Ingesting data into SQLite")
+    ingest.ingest_csv(Config.RAW_DATA_PATH / 'SalesFINAL12312016.csv',
+                      'SalesDec')
+    ingest.ingest_csv(Config.RAW_DATA_PATH / 'PurchasesFINAL12312016.csv',
+                      'PurchasesDec')
+    ingest.ingest_csv(Config.RAW_DATA_PATH / 'InvoicePurchases12312016.csv',
+                      'VendorInvoicesDec')
+    ingest.ingest_csv(Config.RAW_DATA_PATH / 'EndInvFINAL12312016.csv',
+                      'EndInvDec')
+    ingest.ingest_csv(Config.RAW_DATA_PATH / 'BegInvFINAL12312016.csv',
+                      'BegInvDec')
+    ingest.ingest_csv(Config.RAW_DATA_PATH / '2017PurchasePricesDec.csv',
+                      'PricingPurchasesDec')
+    print("Ingestion complete")
+
+
+def analyze_and_report():
+    print("Running analysis + reporting")
+    report.generate_report()
+    print("Report generated in ./reports/report.md")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run the full Annie's analysis pipeline")
+    parser.add_argument("--skip-gathering", action="store_true", help="Skip data download")
+    parser.add_argument("--skip-ingest", action="store_true", help="Skip CSV ingestion")
+    parser.add_argument("--skip-analysis", action="store_true", help="Skip analysis and reporting")
+    args = parser.parse_args()
+
+    if not args.skip_gathering:
+        gather()
+    if not args.skip_ingest:
+        ingestion()
+    if not args.skip_analysis:
+        analyze_and_report()
+
+    print("Pipeline finished successfully")
+
+if __name__ == "__main__":
+    main()
