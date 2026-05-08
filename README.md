@@ -16,10 +16,48 @@ Task at hand
   2. Top 10 brands with highest based on profit ($) and margin (%).
   3. Which brands / products should she drop as a wholesales because they are loosing money.
 
+## Installation and execution
+
+To install into a virtual environment,
+```
+$ uv sync
+```
+
+Activate the virtual environment
+
+```
+$ source .venv/bin/activate
+```
+
+### Running the pipeline
+Once the virtual environment is activated, we can run the pipeline
+
+```
+$ [.venv] python run_pipeline.py
+```
+The resulting report will be found in `reports/report.md`
+
+The pipeline can accept the following command line arguments:
+- `--skip-gathering` Skips data downloading
+- `--skip-ingest` Skips CSV ingestion into SQLite
+- `--skip-analysis` Skips analysis and report generation
+
+### Jupyter Notebooks
+
+There are a couple of notebooks found in `notebooks`. To run them,
+execute
+
+```
+$[.venv] jupyter notebook
+```
+and navigate to the `notebooks` directory. There you will find both
+SQL and analysis notebooks.
+
+
 ## Project structure
 - Ingest data from CSV to a SQL database
 - Perform data analysis with Python
-  - Use a Jupyter notebook to explore the ingested data.
+  - Use Jupyter notebooks to explore the ingested data.
   - Create methods that can extract and process the information we obtained
   from the database.
   - Another script deals with generating the report. Create another Jupyter notebook for easy visualization.
@@ -31,3 +69,4 @@ Task at hand
 - Database: SQLite with SQLAlchemy
 - Notebooks: Jupyter with jupysqsl for SQL magic
 - Reporting: mdutils, tabulate
+
