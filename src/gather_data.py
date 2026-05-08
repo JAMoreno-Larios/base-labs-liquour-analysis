@@ -16,8 +16,8 @@ from config import Config
 
 # Define the website URL
 BASE_URL = (
-    "https://www.pwc.com/us/en/career/"
-    "/university_relations/data_analytics_cases_studies"
+    "https://www.pwc.com/us/en/careers/"
+    "university_relations/data_analytics_cases_studies"
 )
 
 # Create a dictionary with ZIP and CSV filename relations
@@ -25,9 +25,9 @@ FILES = {
     "PurchasesFINAL12312016csv.zip": "PurchasesFINAL12312016.csv",
     "BegInvFINAL12312016csv.zip": "BegInvFINAL12312016.csv",
     "2017PurchasePricesDeccsv.zip": "2017PurchasePricesDec.csv",
-    "VendorInvoices12312016csv.zip": "VendorInvoices12312016.csv",
+    "VendorInvoices12312016csv.zip": "InvoicePurchases12312016.csv",
     "EndInvFINAL12312016csv.zip": "EndInvFINAL12312016.csv",
-    "SalesFINAL12312016csv.zip": "SalesFINAL12312016.csv"
+    "SalesFINAL12312016csv.zip": "SalesFINAL12312016.csv",
 }
 
 def download_extract(zip_name: str,
