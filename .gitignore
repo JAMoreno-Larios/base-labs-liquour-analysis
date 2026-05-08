@@ -227,3 +227,6 @@ __marimo__/
 
 # Ignore CSV files
 *.csv
+
+.python-version
+reports/report.md
