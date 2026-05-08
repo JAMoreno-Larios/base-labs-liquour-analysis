@@ -79,7 +79,8 @@ mdFile.new_paragraph(losing_brands[["Brand",
                      .to_markdown(index=False)
                      )
 
-mdFile.new_header(level=2, title="Results")
+# Brand results
+mdFile.new_header(level=2, title="Brand Analysis - Key Results")
 
 mdFile.new_header(level=3, title="High Vodka and Whiskey sales drive most of the profit")
 
@@ -103,8 +104,16 @@ mdFile.new_header(level=3, title="High margins correspond to low-volume items")
 
 mdFile.new_paragraph(
     """
-Brands with 90%+ margins correspond to tiny revenue scales. Again, this
-could be influenced by existing inventory with minimal restocking.
+Brands with 90%+ margins correspond to tiny revenue scales. This is caused by existing inventory with minimal restocking. These products are not scalable profit drivers.
+    """
+)
+
+mdFile.new_header(level=3, title="Losing brands reflect a change in consumer taste")
+
+mdFile.new_paragraph(
+    """
+Most of the losing brands in the period are wines with high COGS, suggesting that Annie's may have overprovisioned the stock for the season.
+We'd recommend to not order new stock on the losing brands until their COGS value gets lower in future months.
     """
 )
 
@@ -151,6 +160,29 @@ mdFile.new_paragraph(losing_vendors[["VendorNumber",
                      .head(20)
                      .to_markdown(index=False)
                      )
+
+# Vendor results
+mdFile.new_header(level=2, title="Vendor Analysis - Key Results")
+
+mdFile.new_header(level=3, title="Diageo and Martignetti dominate profits")
+
+profit_share = (top_profit_vendor["profit"].iloc[0] + top_profit_vendor["profit"].iloc[1]) / top_profit_vendor["profit"].sum() * 100
+mdFile.new_paragraph(f"""
+Diageo North America generates 17.5 million in profit; Martignetti Companies, 13.1 million.
+These two companies represent the {profit_share}% of the top 10 earners.
+""")
+
+mdFile.new_header(level=3, title="Losing vendors are small contributors")
+
+mdFile.new_paragraph(f"""
+All losing vendors are small producers with revenue under 70k. The only company worth reviewing are Adamba Imports (67.6k revenue, -9.6k loss).
+""")
+
+mdFile.new_header(level=3, title="No major vendor relationships need termination")
+
+mdFile.new_paragraph(f"""
+All 10 profit-driving vendors are healthy. Losing vendor losses can be either ignored or fixed through pricing.
+""")
 
 # Generate the file
 mdFile.create_md_file()
