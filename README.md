@@ -18,4 +18,16 @@ Task at hand
 
 ## Project structure
 - Ingest data from CSV to a SQL database
-- Perform data analysis with Python, maybe create a notebook for easier viewing?
+- Perform data analysis with Python
+  - Use a Jupyter notebook to explore the ingested data.
+  - Create methods that can extract and process the information we obtained
+  from the database.
+  - Another script deals with generating the report. Create another Jupyter notebook for easy visualization.
+
+## Stack
+- Language: Python 3.14
+- Package manager: uv
+- Data processing: pandas, NumPy
+- Database: SQLite with SQLAlchemy
+- Notebooks: Jupyter with jupysqsl for SQL magic
+- Reporting: mdutils, tabulate
