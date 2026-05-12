@@ -20,6 +20,10 @@ class Config:
     RAW_DATA_PATH = basedir / 'data/raw'
     REPORT_PATH = basedir / 'reports'
 
+    TABULATE_KWARGS = {
+                       "tablefmt": "github",
+                       }
+
     def __class_getitem__(cls, item):
         # Makes our class subscriptable
         return getattr(cls, item)
