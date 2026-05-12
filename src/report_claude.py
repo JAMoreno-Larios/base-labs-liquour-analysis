@@ -11,8 +11,8 @@ For this implementation, we will be using Langchain as our framework
 J. A. Moreno
 """
 
+from langchain.agents import create_agent
 from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 from mdutils.mdutils import MdUtils
 from dotenv import load_dotenv
@@ -38,15 +38,11 @@ class ActionableInsights(BaseModel):
 def set_up_llm():
     # Initialize base model
     llm = ChatAnthropic(
-        model="claude-haiku-4-5-20251001",  # Budget choice for this task
+        # model="claude-haiku-4-5-20251001",  # Budget choice for this task
+        model="claude-sonnet-4-6",  # More capable than Haiku
         temperature=0.0,  # We want answers to be more deterministic
     )
-    # Add structured output
-    llm_with_structure = llm.with_structured_output(ActionableInsights,
-                                                    strict=True,
-                                                    method="json_schema"
-                                                    )
-    return llm_with_structure
+    return llm
     
 
 # Auxiliary functions to generate pandas views from SQL queries
@@ -105,36 +101,38 @@ insights for Annie, the owner of a wholesale liquor business,
 in a professional and consice manner.
 Your output must be markdown, using H2 headers or smaller.
 The answers must be grounded in the provided data only.
+If you need to get the number of companies of a certain category,
+count the number of rows of the provided tables.
 Do not make assumptions about totals since the data provided is a sample
 of the complete dataset.
 """
 
     # Define user prompt
     user_prompt = """
-    # Data
-    ## Brand-based data
-    ### Top 10 profit
-    {brand_profit}
-    ### Top 10 margin
-    {brand_margin_naive}
-    ### Top 10 margin, filtered
-    {brand_margin_filtered}
-    ### Losing brands
-    {brand_loses}
-    ## Vendor-based data
-    ### Top 10 profit
-    {vendor_profit}
-    ### Top 10 margin
-    {vendor_margin_naive}
-    ### Top 10 margin, filtered
-    {vendor_margin_filtered}
-    ### Losing vendors
-    {vendor_loses}
-    # To do
-    Generate the top three actionable insights to improve business
-    efficiency and increase profits (i. e. dropping losing brands/vendors,
-    negotiating new prices) based on the brand and vendor
-    data provided above.
+# Data
+## Brand-based data
+### Top 10 profit
+{brand_profit}
+### Top 10 margin
+{brand_margin_naive}
+### Top 10 margin, filtered
+{brand_margin_filtered}
+### Losing brands
+{brand_loses}
+## Vendor-based data
+### Top 10 profit
+{vendor_profit}
+### Top 10 margin
+{vendor_margin_naive}
+### Top 10 margin, filtered
+{vendor_margin_filtered}
+### Losing vendors
+{vendor_loses}
+# To do
+Generate the top three actionable insights to improve business
+efficiency and increase profits (i. e. dropping losing brands/vendors,
+negotiating new prices) based on the brand and vendor
+data provided above.
     """
 
     # Generate chat prompt
@@ -174,12 +172,16 @@ def generate_report():
     # Add data to template
     formatted_template = template.format_messages(**llm_variables)
 
-    # Print to console
-    for message in formatted_template:
-            message.pretty_print()
+    # Create agent
+    agent = create_agent(
+        model=llm,
+        system_prompt=formatted_template[0],
+        response_format=ActionableInsights,
+    )
 
     # Run the LLM
-    response = llm.invoke(formatted_template)
+    response = agent.invoke(
+        {"messages": [formatted_template[1]]})
 
     # Start building the document
 
@@ -209,13 +211,15 @@ def generate_report():
     )
 
     mdFile.new_header(level=1, title="Top 3 actionable insights for Annie")
-    mdFile.new_paragraph(response.actionables)
+    mdFile.new_paragraph(response["structured_response"].actionables)
 
     mdFile.new_header(level=1, title="Methodology")
     mdFile.new_paragraph("""
-    For this analysis, we will calculate the profits using the Cost Of Goods Sold (COGS) metric. In this way we can determine our best-selling brands and vendors.
-    
-    From our SQL database exploration (refer to `notebooks/sql_columns_exploration.ipynb`), we do need to calculate two different COGS metrics: the full equation for the per-brand metrics, and a purchases-only COGS for the per-vendor one since the inventory tables do not contain vendor-specific information.
+    For this analysis, we will calculate the profits using the Cost Of Goods Sold (COGS) metric. In this way we can determine
+    our best-selling brands and vendors.
+    From our SQL database exploration (refer to `notebooks/sql_columns_exploration.ipynb`), we do need to calculate two different
+    COGS metrics: the full equation for the per-brand metrics, and a purchases-only COGS for the per-vendor one since
+    the inventory tables do not contain vendor-specific information.
     
     The full accounting COGS formula is:
     $$COGS = Initial Inventory Value + Purchases + Freight Costs - Final Inventory Value$$
@@ -226,9 +230,8 @@ def generate_report():
     Thus, the margins are:
     $$Margins = (Revenue - COGS) / Revenue * 100 [%]$$
 
-    We found out that we cannot use the full accounting COGS formula for our
-    vendor-based analysis since there is no vendor data in the inventory
-    tables, thus, we use a modified COGS formula to estimate profits:
+    We found out that we cannot use the full accounting COGS formula for our vendor-based analysis since there is
+    no vendor data in the inventory tables, thus, we use a modified COGS formula to estimate profits:
 
         $$COGS_vendor = Purchases_vendor + Freight_vendor$$
     
