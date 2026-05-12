@@ -20,8 +20,19 @@ class Config:
     RAW_DATA_PATH = basedir / 'data/raw'
     REPORT_PATH = basedir / 'reports'
 
-    TABULATE_KWARGS = {
+    TABULATE_BRAND_KWARGS = {
                        "tablefmt": "github",
+                        "headers": ["Brand", "Description", "Total Revenue [USD]", 
+                                  "COGS [USD]", "Profit [USD]", "Margin [%]"],
+        "floatfmt": ("10,.2f", "10,.2f", "10,.2f",
+                                   "10,.2f", "10,.2f", "10,.2f"),
+                       }
+    TABULATE_VENDOR_KWARGS = {
+                       "tablefmt": "github",
+                        "headers": ["Vendor ID", "Vendor Name", "Total Revenue [USD]", 
+                                               "Purchase COGS [USD]", "Profit [USD]", "Margin [%]"],
+                        "floatfmt": ("10,.2f", "10,.2f", "10,.2f",
+                                     "10,.2f", "10,.2f", "10,.2f"),
                        }
 
     def __class_getitem__(cls, item):

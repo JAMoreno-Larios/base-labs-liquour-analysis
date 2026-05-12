@@ -73,40 +73,24 @@ def generate_report():
     top_profit = summary_brand[
         ["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]
     ].nlargest(10, "profit")
-    mdFile.new_paragraph(top_profit.to_markdown(index=False, **Config.TABULATE_KWARGS,
-                                                headers=["Brand", "Description", "Total Revenue [USD]", 
-                                                           "COGS [USD]", "Profit [USD]", "Margin [%]"],
-                                                floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                                                           "10,.2f", "10,.2f", "10,.2f"),
-                                                )
-                         )
+    mdFile.new_paragraph(top_profit.to_markdown(index=False, **Config.TABULATE_BRAND_KWARGS))
+    mdFile.new_line("\n")
 
     mdFile.new_header(level=2, title="Per margins")
     mdFile.new_header(level=3, title="Naive run - no purchases done in the period")
     top_margin_naive = summary_brand[
         ["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]
     ].nlargest(10, "margin")
-    mdFile.new_paragraph(top_margin_naive.to_markdown(index=False,
-                         headers=["Brand", "Description", "Total Revenue [USD]", 
-                                  "COGS [USD]", "Profit [USD]", "Margin [%]"],
-                         floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                                   "10,.2f", "10,.2f", "10,.2f"),
-                                                      )
-                         )
+    mdFile.new_paragraph(top_margin_naive.to_markdown(index=False, **Config.TABULATE_BRAND_KWARGS))
+    mdFile.new_line("\n")
 
     mdFile.new_header(level=3, title="Considering if brand was ordered in the period")
     top_margin_filtered = summary_brand[summary_brand["cogs"] > 0]
     top_margin_filtered = top_margin_filtered[
         ["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]
     ].nlargest(10, "margin")
-    mdFile.new_paragraph(top_margin_filtered.to_markdown(index=False,
-                         headers=["Brand", "Description", "Total Revenue [USD]", 
-                                  "COGS [USD]", "Profit [USD]", "Margin [%]"],
-                         floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                                   "10,.2f", "10,.2f", "10,.2f"),
-                                                      )
-                         )
-
+    mdFile.new_paragraph(top_margin_filtered.to_markdown(index=False, **Config.TABULATE_BRAND_KWARGS))
+    mdFile.new_line("\n")
 
     mdFile.new_header(level=2, title="Losing brands")
 
@@ -116,13 +100,9 @@ def generate_report():
             ["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]
         ]
         .head(20)
-        .to_markdown(index=False,
-                     headers=["Brand", "Description", "Total Revenue [USD]", 
-                              "COGS [USD]", "Profit [USD]", "Margin [%]"],
-                     floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                               "10,.2f", "10,.2f", "10,.2f"),
-                     )
+        .to_markdown(index=False, **Config.TABULATE_BRAND_KWARGS)
     )
+    mdFile.new_line("\n")
 
     # Brand results
     mdFile.new_header(level=2, title="Brand Analysis - Key Results")
@@ -188,14 +168,8 @@ def generate_report():
         ["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]
     ].nlargest(10, "profit")
 
-    mdFile.new_paragraph(top_profit_vendor
-                         .to_markdown(index=False,
-                                      headers=["Vendor ID", "Vendor Name", "Total Revenue [USD]", 
-                                               "Purchase COGS [USD]", "Profit [USD]", "Margin [%]"],
-                                      floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                                                "10,.2f", "10,.2f", "10,.2f"),
-                                      )
-                         )
+    mdFile.new_paragraph(top_profit_vendor.to_markdown(index=False, **Config.TABULATE_VENDOR_KWARGS))
+    mdFile.new_line("\n")
 
     mdFile.new_header(level=2, title="Per margins")
     mdFile.new_header(level=3, title="Naive run - no purchases done in the period")
@@ -203,14 +177,8 @@ def generate_report():
     top_margin_vendor_naive = summary_vendor[
         ["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]
     ].nlargest(10, "margin")
-    mdFile.new_paragraph(top_margin_vendor_naive
-                         .to_markdown(index=False,
-                                      headers=["Vendor ID", "Vendor Name", "Total Revenue [USD]", 
-                                               "Purchase COGS [USD]", "Profit [USD]", "Margin [%]"],
-                                      floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                                                "10,.2f", "10,.2f", "10,.2f"),
-                                      )
-                         )
+    mdFile.new_paragraph(top_margin_vendor_naive.to_markdown(index=False, **Config.TABULATE_VENDOR_KWARGS))
+    mdFile.new_line("\n")
 
     mdFile.new_header(
         level=3, title="Considering if we ordered from a given vendor during the period"
@@ -221,14 +189,8 @@ def generate_report():
         ["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]
     ].nlargest(10, "margin")
 
-    mdFile.new_paragraph(top_margin_vendor_filtered
-                         .to_markdown(index=False,
-                                      headers=["Vendor ID", "Vendor Name", "Total Revenue [USD]", 
-                                               "Purchase COGS [USD]", "Profit [USD]", "Margin [%]"],
-                                      floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                                                "10,.2f", "10,.2f", "10,.2f"),
-                                      )
-                         )
+    mdFile.new_paragraph(top_margin_vendor_filtered.to_markdown(index=False, **Config.TABULATE_VENDOR_KWARGS))
+    mdFile.new_line("\n")
 
     mdFile.new_header(level=2, title="Losing Vendors")
 
@@ -238,13 +200,9 @@ def generate_report():
             ["VendorNumber", "VendorName", "total_revenue", "cogs", "profit", "margin"]
         ]
         .head(20)
-        .to_markdown(index=False,
-                     headers=["Vendor ID", "Vendor Name", "Total Revenue [USD]", 
-                              "Purchase COGS [USD]", "Profit [USD]", "Margin [%]"],
-                     floatfmt=("10,.2f", "10,.2f", "10,.2f",
-                               "10,.2f", "10,.2f", "10,.2f"),
-                     )
+        .to_markdown(index=False, **Config.TABULATE_VENDOR_KWARGS)
     )
+    mdFile.new_line("\n")
 
     # Vendor results
     mdFile.new_header(level=2, title="Vendor Analysis - Key Results")
