@@ -73,7 +73,13 @@ def generate_report():
     top_profit = summary_brand[
         ["Brand", "Description", "total_revenue", "cogs", "profit", "margin"]
     ].nlargest(10, "profit")
-    mdFile.new_paragraph(top_profit.to_markdown(index=False))
+    mdFile.new_paragraph(top_profit.to_markdown(index=False, **Config.TABULATE_KWARGS,
+                                                headers=["Brand", "Description", "Total Revenue [USD]", 
+                                                           "COGS [USD]", "Profit [USD]", "Margin [%]"],
+                                                floatfmt=("10,.2f", "10,.2f", "10,.2f",
+                                                           "10,.2f", "10,.2f", "10,.2f"),
+                                                )
+                         )
 
     mdFile.new_header(level=2, title="Per margins")
     mdFile.new_header(level=3, title="Naive run - no purchases done in the period")
