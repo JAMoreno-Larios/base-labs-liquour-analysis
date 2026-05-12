@@ -194,7 +194,7 @@ def generate_report():
     mdFile.new_header(level=1, title="Introduction")
     mdFile.new_paragraph(
         """
-    We want to analyze the:
+We want to analyze the:
         """
     )
     mdFile.new_list(
@@ -206,7 +206,7 @@ def generate_report():
     )
     mdFile.new_paragraph(
         """
-   For this report, we present LLM-generated insights based on our processed data. 
+For this report, we present LLM-generated insights based on our processed data. 
         """
     )
 
@@ -215,37 +215,37 @@ def generate_report():
 
     mdFile.new_header(level=1, title="Methodology")
     mdFile.new_paragraph("""
-    For this analysis, we will calculate the profits using the Cost Of Goods Sold (COGS) metric. In this way we can determine
-    our best-selling brands and vendors.
-    From our SQL database exploration (refer to `notebooks/sql_columns_exploration.ipynb`), we do need to calculate two different
-    COGS metrics: the full equation for the per-brand metrics, and a purchases-only COGS for the per-vendor one since
-    the inventory tables do not contain vendor-specific information.
-    
-    The full accounting COGS formula is:
-    $$COGS = Initial Inventory Value + Purchases + Freight Costs - Final Inventory Value$$
-    
-    Then, the profit is:
-    $$Profit = Revenue - COGS$$
-    
-    Thus, the margins are:
-    $$Margins = (Revenue - COGS) / Revenue * 100 [%]$$
+For this analysis, we will calculate the profits using the Cost Of Goods Sold (COGS) metric. In this way we can determine
+our best-selling brands and vendors.
+From our SQL database exploration (refer to `notebooks/sql_columns_exploration.ipynb`), we do need to calculate two different
+COGS metrics: the full equation for the per-brand metrics, and a purchases-only COGS for the per-vendor one since
+the inventory tables do not contain vendor-specific information.
 
-    We found out that we cannot use the full accounting COGS formula for our vendor-based analysis since there is
-    no vendor data in the inventory tables, thus, we use a modified COGS formula to estimate profits:
+The full accounting COGS formula is:
+$$COGS = Initial Inventory Value + Purchases + Freight Costs - Final Inventory Value$$
 
-        $$COGS_vendor = Purchases_vendor + Freight_vendor$$
-    
+Then, the profit is:
+$$Profit = Revenue - COGS$$
+
+Thus, the margins are:
+$$Margins = (Revenue - COGS) / Revenue * 100 [%]$$
+
+We found out that we cannot use the full accounting COGS formula for our vendor-based analysis since there is
+no vendor data in the inventory tables, thus, we use a modified COGS formula to estimate profits:
+
+    $$COGS_vendor = Purchases_vendor + Freight_vendor$$
+
         """)
 
     mdFile.new_header(level=1, title="Supporting data")
     
     mdFile.new_paragraph(
         """
-    Freight costs are considered as a per-invoice basis, the data on the sales and purchases tables are shown as per-store.
-    We will aggregate this information into a per-brand basis so we can account for a proportional freight allocation for
-    the COGS calculation.
-    
-    From exploring the SQL tables, we identified that the brand refers to a single product type.
+Freight costs are considered as a per-invoice basis, the data on the sales and purchases tables are shown as per-store.
+We will aggregate this information into a per-brand basis so we can account for a proportional freight allocation for
+the COGS calculation.
+
+From exploring the SQL tables, we identified that the brand refers to a single product type.
     """
     )
     ### BRANDS
