@@ -29,18 +29,39 @@ Activate the virtual environment
 $ source .venv/bin/activate
 ```
 
+### Setting the Anthropic API key
+
+Create a `.env` file in the root directory, see `.env.example` for
+the template:
+
+```
+# Set your Anthropic API key
+ANTHROPIC_API_KEY=YOUR_CLAUDE_API_KLEY
+
+# Set Langsmith API key for tracing with Langchain
+LANGSMITH_API_KEY=YOUR_LANGSMITH_API_KEY
+LANGSMITH_TRACING=true
+LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+LANGSMITH_PROJECT=base-labs-liquour-analysis
+```
+
+Substitute the API key placeholders with your own. If you're not
+interested in using Langsmith tracing, you can remove those lines from
+your `.env` file.
+
 ### Running the pipeline
 Once the virtual environment is activated, we can run the pipeline
 
 ```
 $ [.venv] python run_pipeline.py
 ```
-The resulting report will be found in `reports/report.md`
+The resulting report will be found in `reports/report_llm.md`
 
 The pipeline can accept the following command line arguments:
 - `--skip-gathering` Skips data downloading
 - `--skip-ingest` Skips CSV ingestion into SQLite
 - `--skip-analysis` Skips analysis and report generation
+- `--no-llm-analysis` Generates report using `src/report.py` instead of `src/report_claude.py`. Report will be saved as `reports/report.md`
 
 ### Jupyter Notebooks
 
@@ -60,13 +81,20 @@ SQL and analysis notebooks.
   - Use Jupyter notebooks to explore the ingested data.
   - Create methods that can extract and process the information we obtained
   from the database.
-  - Another script deals with generating the report. Create another Jupyter notebook for easy visualization.
+  - Another script deals with generating the report with LLM support.
+
+## Possible follow-up work
+
+- Implement a SQL agent that can perform queries to the database
+- Enable caching for common queries and responses
 
 ## Stack
 - Language: Python 3.14
 - Package manager: uv
+- LLM support: langchain, langchain-anthropic
 - Data processing: pandas, NumPy
 - Database: SQLite with SQLAlchemy
 - Notebooks: Jupyter with jupysqsl for SQL magic
 - Reporting: mdutils, tabulate
+- Secrets: dotenv
 
