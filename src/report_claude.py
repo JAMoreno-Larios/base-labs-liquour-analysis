@@ -36,11 +36,17 @@ class ActionableInsights(BaseModel):
 
 
 def set_up_llm():
+    # Initialize base model
     llm = ChatAnthropic(
         model="claude-haiku-4-5-20251001",  # Budget choice for this task
         temperature=0.0,  # We want answers to be more deterministic
     )
-    return llm
+    # Add structured output
+    llm_with_structure = llm.with_structured_output(ActionableInsights,
+                                                    strict=True,
+                                                    method="json_schema"
+                                                    )
+    return llm_with_structure
     
 
 # Auxiliary functions to generate pandas views from SQL queries
@@ -124,7 +130,8 @@ The answers must be grounded in the provided data.
     {vendor_loses}
     # To do
     Generate the top three actionable insights to improve business
-    efficiency and increase profits based on the brand and vendor
+    efficiency and increase profits (i. e. dropping losing brands/vendors,
+    negotiating new prices) based on the brand and vendor
     data provided above.
     """
 
@@ -140,9 +147,42 @@ The answers must be grounded in the provided data.
 
 def generate_report():
 
+    # Generate data
+    brand_data = generate_brand_tables()
+    vendor_data = generate_vendor_tables()
+
+    # Instantiate the LLM
+    llm = set_up_llm()
+
+    # Instantiate the template
+    template = generate_template()
+
+    # Prepare chat template keyword arguments to fill the variables
+    llm_variables = {
+        "brand_profit": brand_data[0],
+        "brand_margin_naive": brand_data[1],
+        "brand_margin_filtered": brand_data[2],
+        "brand_loses": brand_data[3],
+        "vendor_profit": vendor_data[0],
+        "vendor_margin_naive": vendor_data[1],
+        "vendor_margin_filtered": vendor_data[2],
+        "vendor_loses": vendor_data[3]
+    }
+
+    # Add data to template
+    template.format_messages(**llm_variables)
+
+    # Print to console
+    print(template.pretty_print())
+
+    # Run the LLM
+    response = llm.invoke(template)
+
+    # Start building the document
+
     mdFile = MdUtils(
-        file_name=str(Config.REPORT_PATH / "report.md"),
-        title="Annie's Magic Numbers Code Challenge",
+        file_name=str(Config.REPORT_PATH / "report_llm.md"),
+        title="Annie's Magic Numbers Code Challenge - LLM insights",
     )
     mdFile.author = "José Agustín Moreno"
 
