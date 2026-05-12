@@ -9,7 +9,7 @@ J. A. Moreno
 """
 
 import argparse
-from src import gather_data, ingest, report
+from src import gather_data, ingest, report, report_claude
 from src.config import Config
 
 def gather():
@@ -45,12 +45,18 @@ def analyze_and_report():
     report.generate_report()
     print("Report generated in ./reports/report.md")
 
+def analyze_and_report_llm():
+    print("Running analysis + reporting with LLM support")
+    report_claude.generate_report()
+    print("Report generated in ./reports/report_llm.md")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run the full Annie's analysis pipeline")
     parser.add_argument("--skip-gathering", action="store_true", help="Skip data download")
     parser.add_argument("--skip-ingest", action="store_true", help="Skip CSV ingestion")
     parser.add_argument("--skip-analysis", action="store_true", help="Skip analysis and reporting")
+    parser.add_argument("--no-llm-analysis", action="store_true", help="Do not use the LLM-based analysis and reporting")
     args = parser.parse_args()
 
     if not args.skip_gathering:
@@ -58,7 +64,10 @@ def main():
     if not args.skip_ingest:
         ingestion()
     if not args.skip_analysis:
-        analyze_and_report()
+        if args.no_llm_analysis:
+            analyze_and_report()
+        else:
+            analyze_and_report_llm()
 
     print("Pipeline finished successfully")
 
